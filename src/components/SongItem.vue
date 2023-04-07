@@ -1,7 +1,7 @@
 <template>
     <li class="flex justify-between items-center p-3 pl-6 cursor-pointer transition duration-300 hover:bg-gray-50">
         <div>
-            <router-link :to="{ name:'song', params: {id: song.docID}}" class="font-bold block text-gray-600">
+            <router-link :to="{ name:'song', params: {id: song.docID}}" class="font-bold block text-gray-600" :class="{'text-green-600': current_song.modified_name === song.modified_name}">
                 {{ song.modified_name }}
             </router-link>
             <span class="text-gray-500 text-sm">
@@ -21,7 +21,13 @@
 </template>
 
 <script>
+import {mapState} from 'pinia'
+import usePlayerStore from '../stores/player'
+
 export default {
 props:['song'],
+computed:{
+    ...mapState(usePlayerStore,['current_song'])
+}
 }
 </script>

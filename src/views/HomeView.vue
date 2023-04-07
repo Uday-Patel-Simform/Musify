@@ -2,7 +2,7 @@
   <main>
     <!-- Introduction -->
     <section class="mb-8 py-20 text-white text-center relative">
-      <div class="absolute inset-0 w-full h-full bg-contain introduction-bg"
+      <div class="absolute inset-0 w-full h-full bg-cover introduction-bg"
         style="background-image: url(assets/img/header.png)"></div>
       <div class="container mx-auto">
         <div class="text-white main-header-content">
@@ -35,8 +35,9 @@
   </main>
 </template>
 <script>
-import { songs_collection } from '../includes/firebase'
 import songItem from '../components/SongItem.vue'
+import useSongsStore from '../stores/songs'
+import {mapActions,mapState} from 'pinia'
 
 export default {
   components: {
@@ -44,21 +45,22 @@ export default {
   },
   data() {
     return {
-      songs: [],
       maxPerPage: 25,
       pendingReq: false,
     }
   },
-
+  computed:{
+    ...mapState(useSongsStore,['songs'])
+},
   async created() {
     this.getSongs()
-
     window.addEventListener('scroll', this.handelScroll)
   },
   beforeUnmount() {
     window.removeEventListener('scroll', this.handelScroll)
   },
   methods: {
+    ...mapActions(useSongsStore,['getSongs']),
     handelScroll() {
       const { scrollTop, offsetHeight } = document.documentElement
       const { innerHeight } = window
@@ -67,37 +69,6 @@ export default {
         this.getSongs()
       }
     },
-    async getSongs() {
-      if (this.pendingReq) {
-        return
-      }
-
-      this.pendingReq = true
-
-      let snapshots
-
-      if (this.songs.length) {
-        const lastDoc = await songs_collection
-          .doc(this.songs[this.songs.length - 1].docID).get()
-
-        snapshots = await songs_collection
-          .orderBy('modified_name')
-          .startAfter(lastDoc)
-          .limit(this.maxPerPage).get()
-      } else {
-        snapshots = await songs_collection
-          .orderBy('modified_name')
-          .limit(this.maxPerPage).get()
-      }
-
-      snapshots.forEach((doc) => {
-        this.songs.push({
-          docID: doc.id,
-          ...doc.data(),
-        })
-      })
-      this.pendingReq = false
-    }
   }
 }
 </script>

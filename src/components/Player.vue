@@ -13,7 +13,7 @@
         <div class="flex flex-nowrap gap-4 items-center">
             <!-- Play/Pause Button -->
             <button type="button" @click.prevent="toggleAudio">
-                <i :class="{ 'fa-play' : !playing, 'fa-pause' : playing}" class="fa text-gray-500 text-xl"></i>
+                <i :class="{ 'fa-play' : !playing, 'fa-pause' : playing}" class="fa text-gray-500 text-xl hover:text-green-500"></i>
             </button>
             <!-- Current Position -->
             <div class="player-currenttime">
@@ -33,19 +33,37 @@
                 {{ duration }}
             </div>
         </div>
+        <div class="flex text-center w-24 m-auto justify-between">
+            <button type="button" @click.prevent="toNextSong" class="rotate-180">
+                <i class="fa fa-forward text-gray-500 text-xl hover:text-green-500"></i>
+            </button>
+            <button type="button" @click.prevent="toPreviousSong">
+                <i class="fa fa-forward text-gray-500 text-xl hover:text-green-500"></i>
+            </button>
+        </div>
     </div>
 </template>
 
 <script>
 import {mapActions,mapState} from 'pinia'
 import usePlayerStore from '../stores/player'
+import useSongsStore from '../stores/songs'
 
 export default {
 methods:{
-    ...mapActions(usePlayerStore,['toggleAudio','updateSeek'])
+    ...mapActions(usePlayerStore,['toggleAudio','updateSeek', 'skipSong']),
+    toNextSong(){
+        let index = this.songs.findIndex(song => this.current_song.docID === song.docID)
+        this.songs[index + 1] ? this.skipSong(this.songs[index + 1]) : this.skipSong(this.songs[0])
+    },
+    toPreviousSong(){
+        let index = this.songs.findIndex(song => this.current_song.docID === song.docID)
+        this.songs[index - 1] ? this.skipSong(this.songs[index - 1]) : this.skipSong(this.songs[this.songs.length - 1])
+    }
 },
 computed:{
-    ...mapState(usePlayerStore,['playing','duration','seek', 'playerProgress','current_song'])
+    ...mapState(usePlayerStore,['playing','duration','seek', 'playerProgress','current_song']),
+    ...mapState(useSongsStore,['songs'])
 }
 }
 </script>

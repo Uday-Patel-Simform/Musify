@@ -63,6 +63,9 @@ export default defineStore('player',{
 
             this.sound.seek(seconds)
             this.sound.once('seek', this.progress())
+        },
+        skipSong(newSong){
+            this.newSong(newSong)
         }
     },
     getters:{
